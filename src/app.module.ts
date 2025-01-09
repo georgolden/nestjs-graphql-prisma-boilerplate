@@ -6,6 +6,7 @@ import { IdentityModule } from './identity/identity.module';
 import { AuthMiddleware } from './identity/middleware/auth.middleware';
 import { ChatModule } from './chat/chat.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { PrismaModule } from './prisma/prisma.module';
     IdentityModule,
     ChatModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
