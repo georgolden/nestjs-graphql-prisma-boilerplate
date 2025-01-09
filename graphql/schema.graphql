@@ -1,0 +1,33 @@
+type Chat {
+  id: Int!
+  title: String!
+  type: String!
+  metadata: String
+  createdAt: DateTime!
+  messages: [Message!]!
+}
+
+type Message {
+  id: Int!
+  chatId: Int!
+  content: String!
+  role: String!
+  timestamp: DateTime!
+}
+
+scalar DateTime
+
+type Query {
+  chats: [Chat!]!
+  chat(id: Int!): Chat
+}
+
+type Mutation {
+  createChat(title: String!, type: String!): Chat!
+  sendMessage(chatId: Int!, content: String!, role: String!): Message!
+}
+
+type Subscription {
+  chatCreated: Chat!
+  messageCreated(chatId: Int!): Message!
+}
