@@ -17,14 +17,54 @@ type Message {
 
 scalar DateTime
 
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+type User {
+  id: Int!
+  email: String
+  name: String!
+  permalink: String!
+  active: Boolean!
+  githubId: String
+  googleId: String
+  avatar: String
+  bio: String
+  role: Role!
+  createdAt: DateTime!
+}
+
+type Session {
+  id: Int!
+  token: String!
+  ip: String
+  userAgent: String
+  user: User!
+  userId: Int!
+  createdAt: DateTime!
+}
+
+input SocialAuthInput {
+  code: String!
+}
+
 type Query {
   chats: [Chat!]!
   chat(id: Int!): Chat
+  githubAuth(input: SocialAuthInput!): User!
+  googleAuth(input: SocialAuthInput!): User!
+  getGoogleAuthURL: String!
+  signIn(email: String!, password: String!): User!
 }
 
 type Mutation {
   createChat(title: String!, type: String!): Chat!
   sendMessage(chatId: Int!, content: String!, role: String!): Message!
+  signUp(email: String!, password: String!, name: String!): User!
+  logout: Boolean!
 }
 
 type Subscription {
