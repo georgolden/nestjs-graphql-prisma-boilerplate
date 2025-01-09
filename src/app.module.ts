@@ -1,8 +1,8 @@
+import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { PrismaModule } from './prisma/prisma.module';
 import { ChatModule } from './chat/chat.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -11,11 +11,11 @@ import { ChatModule } from './chat/chat.module';
       autoSchemaFile: true,
       subscriptions: {
         'graphql-ws': true,
-        'subscriptions-transport-ws': true
+        'subscriptions-transport-ws': true,
       },
     }),
     PrismaModule,
-    ChatModule
+    ChatModule,
   ],
 })
 export class AppModule {}

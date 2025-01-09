@@ -1,4 +1,4 @@
-import { Chat, Message } from "../dto/chat.types";
+import { Chat, Message } from '../dto/chat.types';
 
 export interface PubSubEvents {
   [key: string]: unknown;

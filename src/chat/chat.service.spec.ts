@@ -1,6 +1,6 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ChatService } from './chat.service';
+import { Test, type TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../prisma/prisma.service';
+import { ChatService } from './chat.service';
 import { Chat, Message } from './dto/chat.types';
 
 describe('ChatService', () => {
@@ -13,7 +13,7 @@ describe('ChatService', () => {
     type: 'group',
     metadata: 'test metadata',
     createdAt: new Date(),
-    messages: []
+    messages: [],
   };
 
   const mockMessage: Message = {
@@ -21,7 +21,7 @@ describe('ChatService', () => {
     chatId: 1,
     content: 'Test message',
     role: 'user',
-    timestamp: new Date()
+    timestamp: new Date(),
   };
 
   beforeEach(async () => {
@@ -58,9 +58,11 @@ describe('ChatService', () => {
     it('returns all chats with their messages', async () => {
       const mockChatsWithMessages = [
         { ...mockChat, messages: [mockMessage] },
-        { ...mockChat, id: 2, messages: [] }
+        { ...mockChat, id: 2, messages: [] },
       ];
-      jest.spyOn(prisma.chat, 'findMany').mockResolvedValue(mockChatsWithMessages);
+      jest
+        .spyOn(prisma.chat, 'findMany')
+        .mockResolvedValue(mockChatsWithMessages);
       const result = await service.findAll();
       expect(result).toEqual(mockChatsWithMessages);
     });
@@ -84,14 +86,20 @@ describe('ChatService', () => {
   describe('create', () => {
     it('creates chat with valid data', async () => {
       jest.spyOn(prisma.chat, 'create').mockResolvedValue(mockChat);
-      const result = await service.create({ title: 'Test Chat', type: 'group' });
+      const result = await service.create({
+        title: 'Test Chat',
+        type: 'group',
+      });
       expect(result).toEqual(mockChat);
     });
 
     it('includes empty messages array in new chat', async () => {
       const newChat = { ...mockChat, messages: [] };
       jest.spyOn(prisma.chat, 'create').mockResolvedValue(newChat);
-      const result = await service.create({ title: 'Test Chat', type: 'group' });
+      const result = await service.create({
+        title: 'Test Chat',
+        type: 'group',
+      });
       expect(result.messages).toEqual([]);
     });
   });
@@ -99,20 +107,26 @@ describe('ChatService', () => {
   describe('addMessage', () => {
     it('adds message to existing chat', async () => {
       jest.spyOn(prisma.message, 'create').mockResolvedValue(mockMessage);
-      const result = await service.addMessage(1, { content: 'Test message', role: 'user' });
+      const result = await service.addMessage(1, {
+        content: 'Test message',
+        role: 'user',
+      });
       expect(result).toEqual(mockMessage);
     });
 
     it('sets correct chatId when adding message', async () => {
       const chatId = 1;
       jest.spyOn(prisma.message, 'create').mockResolvedValue(mockMessage);
-      await service.addMessage(chatId, { content: 'Test message', role: 'user' });
+      await service.addMessage(chatId, {
+        content: 'Test message',
+        role: 'user',
+      });
       expect(prisma.message.create).toHaveBeenCalledWith({
         data: {
           content: 'Test message',
           role: 'user',
-          chatId
-        }
+          chatId,
+        },
       });
     });
   });
