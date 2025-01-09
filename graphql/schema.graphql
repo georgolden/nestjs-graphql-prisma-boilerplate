@@ -51,23 +51,34 @@ input SocialAuthInput {
   code: String!
 }
 
+input UpdateUserInput {
+  email: String
+  name: String
+  bio: String
+}
+
+input GetUserInput {
+  userPermalink: String!
+}
+
 type Query {
-  chats: [Chat!]!
-  chat(id: Int!): Chat
+  # Auth queries
   githubAuth(input: SocialAuthInput!): User!
   googleAuth(input: SocialAuthInput!): User!
   getGoogleAuthURL: String!
-  signIn(email: String!, password: String!): User!
+  
+  # User queries
+  me: User
+  user(input: GetUserInput!): User
+  users: [User!]!
 }
 
 type Mutation {
-  createChat(title: String!, type: String!): Chat!
-  sendMessage(chatId: Int!, content: String!, role: String!): Message!
+  # Auth mutations
   signUp(email: String!, password: String!, name: String!): User!
+  signIn(email: String!, password: String!): User!
   logout: Boolean!
-}
-
-type Subscription {
-  chatCreated: Chat!
-  messageCreated(chatId: Int!): Message!
+  
+  # User mutations
+  updateUser(input: UpdateUserInput!): User!
 }

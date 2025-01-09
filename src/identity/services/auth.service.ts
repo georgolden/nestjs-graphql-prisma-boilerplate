@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { OAuthService } from './services/oauth.service';
-import { SessionService } from './services/session.service';
-import { Context } from './types/context.types';
+import { PrismaService } from '../../prisma/prisma.service';
+import { OAuthService } from './oauth.service';
+import { SessionService } from './session.service';
+import { Context } from '../types/context.types';
 import {
   hashPassword,
   verifyPassword,
   generateRandomString,
   generatePermalink,
-} from './utils/crypto';
+} from '../utils/crypto';
 
 @Injectable()
 export class AuthService {

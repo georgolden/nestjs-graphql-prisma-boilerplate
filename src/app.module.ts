@@ -1,8 +1,8 @@
 import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
-import { AuthModule } from './auth/auth.module';
-import { AuthMiddleware } from './auth/middleware/auth.middleware';
+import { IdentityModule } from './identity/identity.module';
+import { AuthMiddleware } from './identity/middleware/auth.middleware';
 import { ChatModule } from './chat/chat.module';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -15,7 +15,7 @@ import { PrismaModule } from './prisma/prisma.module';
       context: ({ req, res }) => ({ req, res }),
     }),
     PrismaModule,
-    AuthModule,
+    IdentityModule,
     ChatModule,
   ],
 })
