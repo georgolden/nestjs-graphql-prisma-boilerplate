@@ -1,6 +1,7 @@
-import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
+import * as cookieParser from 'cookie-parser';
 import { IdentityModule } from './identity/identity.module';
 import { AuthMiddleware } from './identity/middleware/auth.middleware';
 import { ChatModule } from './chat/chat.module';
@@ -21,6 +22,6 @@ import { PrismaModule } from './prisma/prisma.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes('*');
+    consumer.apply(cookieParser(), AuthMiddleware).forRoutes('*');
   }
 }

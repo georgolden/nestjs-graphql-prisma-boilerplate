@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { sign, verify } from 'jsonwebtoken';
-import { SIGNING_KEY } from '../../config/secrets';
+import { SIGNING_KEY } from '../config/identity.config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SessionJwtPayload } from '../types/jwt.types';
 import { generateRandomString } from '../utils/crypto';

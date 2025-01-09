@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { OAuthService } from './oauth.service';
 import { SessionService } from './session.service';
+import { UserService } from './user.service';
 import { Context } from '../types/context.types';
 import {
   hashPassword,
@@ -9,13 +9,14 @@ import {
   generateRandomString,
   generatePermalink,
 } from '../utils/crypto';
+import { COOKIE_MAX_AGE, SECURE_COOKIE } from '../config/identity.config';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private prisma: PrismaService,
     private oauthService: OAuthService,
     private sessionService: SessionService,
+    private userService: UserService,
   ) {}
 
   getGoogleAuthURL() {
@@ -24,32 +25,27 @@ export class AuthService {
 
   async githubAuth(input: { code: string }, context: Context) {
     const githubUser = await this.oauthService.getGitHubUser(input.code);
-    let user = await this.prisma.user.findUnique({
-      where: { githubId: String(githubUser.id) },
+    let user = await this.userService.findOne({
+      githubId: String(githubUser.id),
     });
 
     if (user) {
-      user = await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          name: githubUser.name || githubUser.login,
-          avatar: githubUser.avatar_url,
-          email: githubUser.email || user.email,
-          permalink: generatePermalink(githubUser.name || githubUser.login),
-        },
+      user = await this.userService.updateById(user.id, {
+        name: githubUser.name || githubUser.login,
+        avatar: githubUser.avatar_url,
+        email: githubUser.email || user.email,
+        permalink: generatePermalink(githubUser.name || githubUser.login),
       });
     } else {
-      user = await this.prisma.user.create({
-        data: {
-          githubId: String(githubUser.id),
-          name: githubUser.name || githubUser.login,
-          email: githubUser.email,
-          avatar: githubUser.avatar_url,
-          active: true,
-          role: 'USER',
-          permalink: generatePermalink(githubUser.name || githubUser.login),
-          emailVerificationToken: generateRandomString(32),
-        },
+      user = await this.userService.create({
+        githubId: String(githubUser.id),
+        name: githubUser.name || githubUser.login,
+        email: githubUser.email,
+        avatar: githubUser.avatar_url,
+        active: true,
+        role: 'USER',
+        permalink: generatePermalink(githubUser.name || githubUser.login),
+        emailVerificationToken: generateRandomString(32),
       });
     }
 
@@ -60,9 +56,9 @@ export class AuthService {
     });
 
     context.res.cookie('token', token, {
-      maxAge: 3.154e10,
+      maxAge: COOKIE_MAX_AGE,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: SECURE_COOKIE,
     });
 
     return user;
@@ -70,36 +66,31 @@ export class AuthService {
 
   async googleAuth(input: { code: string }, context: Context) {
     const googleUser = await this.oauthService.getGoogleUser(input.code);
-    let user = await this.prisma.user.findUnique({
-      where: { googleId: String(googleUser.id) },
+    let user = await this.userService.findOne({
+      googleId: String(googleUser.id),
     });
 
     if (user) {
-      user = await this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          name: `${googleUser.given_name} ${googleUser.family_name}`,
-          avatar: googleUser.picture,
-          email: googleUser.email || user.email,
-          permalink: generatePermalink(
-            `${googleUser.given_name} ${googleUser.family_name}`,
-          ),
-        },
+      user = await this.userService.updateById(user.id, {
+        name: `${googleUser.given_name} ${googleUser.family_name}`,
+        avatar: googleUser.picture,
+        email: googleUser.email || user.email,
+        permalink: generatePermalink(
+          `${googleUser.given_name} ${googleUser.family_name}`,
+        ),
       });
     } else {
-      user = await this.prisma.user.create({
-        data: {
-          googleId: String(googleUser.id),
-          name: `${googleUser.given_name} ${googleUser.family_name}`,
-          email: googleUser.email,
-          avatar: googleUser.picture,
-          active: true,
-          role: 'USER',
-          permalink: generatePermalink(
-            `${googleUser.given_name} ${googleUser.family_name}`,
-          ),
-          emailVerificationToken: generateRandomString(32),
-        },
+      user = await this.userService.create({
+        googleId: String(googleUser.id),
+        name: `${googleUser.given_name} ${googleUser.family_name}`,
+        email: googleUser.email,
+        avatar: googleUser.picture,
+        active: true,
+        role: 'USER',
+        permalink: generatePermalink(
+          `${googleUser.given_name} ${googleUser.family_name}`,
+        ),
+        emailVerificationToken: generateRandomString(32),
       });
     }
 
@@ -110,16 +101,16 @@ export class AuthService {
     });
 
     context.res.cookie('token', token, {
-      maxAge: 3.154e10,
+      maxAge: COOKIE_MAX_AGE,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: SECURE_COOKIE,
     });
 
     return user;
   }
 
   async localAuth(email: string, password: string, context: Context) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
+    const user = await this.userService.findOne({ email });
 
     if (!user?.password) {
       throw new Error('Invalid credentials');
@@ -137,9 +128,9 @@ export class AuthService {
     });
 
     context.res.cookie('token', token, {
-      maxAge: 3.154e10,
+      maxAge: COOKIE_MAX_AGE,
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: SECURE_COOKIE,
     });
 
     return user;
@@ -148,16 +139,14 @@ export class AuthService {
   async register(input: { email: string; password: string; name: string }) {
     const hashedPassword = await hashPassword(input.password);
 
-    return this.prisma.user.create({
-      data: {
-        email: input.email,
-        password: hashedPassword,
-        name: input.name,
-        permalink: generatePermalink(input.name),
-        emailVerificationToken: generateRandomString(32),
-        active: false,
-        role: 'USER',
-      },
+    return this.userService.create({
+      email: input.email,
+      password: hashedPassword,
+      name: input.name,
+      permalink: generatePermalink(input.name),
+      emailVerificationToken: generateRandomString(32),
+      active: false,
+      role: 'USER',
     });
   }
 
