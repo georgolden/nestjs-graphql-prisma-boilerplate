@@ -26,10 +26,84 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-## Project setup
+## Project Setup
+
+1. Install dependencies:
+
+npm install
+
+## Database setup
 
 ```bash
-$ npm install
+# Start PostgreSQL database using Docker
+npm run db:up
+
+# Generate Prisma client
+npm run prisma:generate
+
+# Run database migrations
+npm run prisma:migrate
+```
+
+## Create a .env file
+
+```bash
+DATABASE_URL="postgresql://user:password@localhost:5432/dbname"
+GITHUB_CLIENT_ID="your_github_client_id"
+GITHUB_CLIENT_SECRET="your_github_secret"
+GOOGLE_CLIENT_ID="your_google_client_id"
+GOOGLE_CLIENT_SECRET="your_google_secret"
+SIGNING_KEY="your_jwt_signing_key"
+CORS_ORIGIN="http://localhost:3000"
+```
+
+## Development
+
+```bash
+npm run start:dev
+```
+
+## Testing
+
+```bash
+# Run unit tests
+npm run test
+
+# Run e2e tests
+npm run test:e2e
+
+# Run tests with coverage
+npm run test:cov
+```
+
+## Dataabase management
+
+```bash
+# Open Prisma Studio
+npm run prisma:studio
+
+# Seed database
+npm run prisma:seed
+```
+
+## Code Quality
+
+```bash
+# Format code
+npm run format
+
+# Lint code
+npm run lint
+
+# Check and fix code style
+npm run check
+```
+
+## Production
+
+```bash
+npm run build
+npm run start:prod
 ```
 
 ## Compile and run the project
